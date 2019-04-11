@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+   <meta charset="UTF-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+   <title>Vue Lab</title>
+   <link
+     rel="stylesheet"    
+     href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+     crossorigin="anonymous"
+   />
+ </head>
+ <body>
+    <div class="container">
+        <div id="app">
+        <input v-model.number="numStops" type="number"></input>
+        {{userLocation}} 
+        <div class="card" style="width: 18rem;" v-for="stop in fillteredStops">
+                <div class="card-body">
+                  <h5 class="card-title"> {{ stop.name }} </h5>
+                  <p class="card-text"> {{ stop.description }} <br> Distance: {{ stop.distance}} metres. </p>
+                </div>
+        </div>
+        </div>
+    </div>
+   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" 
+   integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" 
+   crossorigin="anonymous"></script>
+   <script
+   src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+   integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+   crossorigin="anonymous"
+ ></script>
+ <script
+   src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+   integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+   crossorigin="anonymous"
+ ></script>
+ <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+ <script>
+let app = new Vue({
+  el: '#app',
+  data: {
+    stops: [],
+    fillteredStop: [],
+    numStops: 10,
+    userLocationLat: 0,
+    userLocationLong: 0,
+  },
+  mounted: function (){
+    fetch('https://utils.pauliankline.com/stops.json')
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(myJson) {
+      for(let i = 0; i<myJson.length; i++){
+            app.stops.push(myJson[i]);
+      }
+  })
+  }, 
+  computed: {
+      fillteredStops : function(){
+        this.fillteredStop = [];
+        this.stops.sort(function (a,b) {
+          if (a.distance < b.distance)
+            return -1;
+          if (a.distance > b.distance)
+            return 1;
+          return 0;
+        });
+        for (let i =0; i<this.numStops; i++){
+          this.fillteredStop.push(this.stops[i]);        
+        }
+          return this.fillteredStop;
+      },
+
+      userLocation: function(){
+          navigator.geolocation.watchPosition(function(position) {
+            this.userLocationLat = position.coords.latitude;
+            this.userLocationLong = position.coords.longitude;
+            console.log(this.userLocationLat,this.userLocationLong);
+            app.distance(this.userLocationLat,this.userLocationLong);
+        })
+      },
+  },
+  methods: {
+     distance(lat,long){
+          for (let i=0; i<this.stops.length; i++){     	
+            let R = 6371e3; // metres
+            let dlat = lat-this.stops[i].lat;
+            let dlong = long-this.stops[i].lon;
+            if(i<10){
+              console.log(lat,long);
+            }
+            let phi1 = degrees_to_radians(this.stops[i].lat);
+            let phi2 = degrees_to_radians(this.userLocationLat);
+            let delta_phi = degrees_to_radians(dlat);
+            let delta_long = degrees_to_radians(dlong);
+
+            let a = Math.sin(delta_phi/2) * Math.sin(delta_phi/2) +
+                    Math.cos(phi1) * Math.cos(phi2) *
+                    Math.sin(delta_long/2) * Math.sin(delta_long/2);
+            let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            this.stops[i].distance = Math.round(R * c);
+          }
+      },
+  },
+});
+
+function degrees_to_radians(degrees)
+{
+  let deg = degrees * (Math.PI/180);
+  return deg;
+}
+</script>
+</body>
+</html>
