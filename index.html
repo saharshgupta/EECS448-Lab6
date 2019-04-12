@@ -91,10 +91,9 @@ let app = new Vue({
             let dlat = lat-this.stops[i].lat;
             let dlong = long-this.stops[i].lon;
             let phi1 = degrees_to_radians(this.stops[i].lat);
-            let phi2 = degrees_to_radians(this.userLocationLat);
+            let phi2 = degrees_to_radians(lat);
             let delta_phi = degrees_to_radians(dlat);
             let delta_long = degrees_to_radians(dlong);
-
             let a = Math.sin(delta_phi/2) * Math.sin(delta_phi/2) +
                     Math.cos(phi1) * Math.cos(phi2) *
                     Math.sin(delta_long/2) * Math.sin(delta_long/2);
@@ -104,7 +103,7 @@ let app = new Vue({
           }
       },
   },
-});
+})
 
 function degrees_to_radians(degrees)
 {
