@@ -80,7 +80,6 @@ let app = new Vue({
           navigator.geolocation.watchPosition(function(position) {
             this.userLocationLat = position.coords.latitude;
             this.userLocationLong = position.coords.longitude;
-            console.log(this.userLocationLat,this.userLocationLong);
             app.distance(this.userLocationLat,this.userLocationLong);
         })
       },
@@ -91,9 +90,6 @@ let app = new Vue({
             let R = 6371e3; // metres
             let dlat = lat-this.stops[i].lat;
             let dlong = long-this.stops[i].lon;
-            if(i<10){
-              console.log(lat,long);
-            }
             let phi1 = degrees_to_radians(this.stops[i].lat);
             let phi2 = degrees_to_radians(this.userLocationLat);
             let delta_phi = degrees_to_radians(dlat);
